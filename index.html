@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>毕业旅行拼团规划 · GradTrip</title>
+<style>
+  :root{
+    --bg:#f6f7fb; --card:#ffffff; --ink:#1f2430; --muted:#6b7280;
+    --brand:#4f6ef7; --brand-2:#7c5cff; --ok:#16a34a; --warn:#d97706;
+    --line:#e5e7eb; --radius:14px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg); color:var(--ink); line-height:1.6;}
+  a{color:var(--brand); text-decoration:none;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 16px;}
+
+  header{background:linear-gradient(135deg,var(--brand),var(--brand-2)); color:#fff; padding:28px 0 64px;}
+  header h1{font-size:28px; letter-spacing:.5px;}
+  header p{opacity:.92; margin-top:6px; max-width:640px;}
+  .hero-badge{display:inline-block; background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.35);
+              padding:2px 10px; border-radius:999px; font-size:12px; margin-bottom:10px;}
+
+  .tabs{display:flex; gap:8px; margin-top:-36px; flex-wrap:wrap;}
+  .tab{background:var(--card); border:1px solid var(--line); border-radius:999px; padding:8px 18px;
+       cursor:pointer; font-size:14px; font-weight:600; color:var(--muted); box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .tab.active{color:#fff; background:linear-gradient(135deg,var(--brand),var(--brand-2)); border-color:transparent;}
+
+  main{padding:24px 0 80px;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px; margin-top:16px;
+        box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .card h2{font-size:17px; margin-bottom:12px; display:flex; align-items:center; gap:8px;}
+  .card h2 .hint{font-size:12px; color:var(--muted); font-weight:400;}
+
+  .row{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  input,select,button{font:inherit;}
+  input,select{border:1px solid var(--line); border-radius:10px; padding:8px 12px; background:#fff; color:var(--ink); outline:none; min-width:0;}
+  input:focus,select:focus{border-color:var(--brand);}
+  button{border:none; border-radius:10px; padding:8px 16px; cursor:pointer; font-weight:600; background:var(--brand); color:#fff;}
+  button:hover{filter:brightness(1.08);}
+  button.ghost{background:#eef1ff; color:var(--brand);}
+  button.danger{background:#fee2e2; color:#b91c1c;}
+  button.small{padding:4px 10px; font-size:13px; border-radius:8px;}
+
+  .grid{display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(300px,1fr));}
+  .list{margin-top:12px; display:flex; flex-direction:column; gap:8px;}
+  .item{border:1px solid var(--line); border-radius:10px; padding:10px 12px; display:flex; justify-content:space-between; gap:10px; align-items:center; background:#fafbfe;}
+  .item .meta{color:var(--muted); font-size:13px;}
+  .pill{display:inline-block; background:#eef1ff; color:var(--brand); border-radius:999px; padding:1px 10px; font-size:12px; font-weight:600;}
+  .pill.green{background:#dcfce7; color:var(--ok);}
+  .pill.orange{background:#fef3c7; color:var(--warn);}
+  .empty{color:var(--muted); font-size:14px; text-align:center; padding:18px 0;}
+
+  .bar{height:8px; border-radius:999px; background:#eef1ff; overflow:hidden; margin-top:6px;}
+  .bar i{display:block; height:100%; background:linear-gradient(90deg,var(--brand),var(--brand-2)); border-radius:999px;}
+
+  .total{font-size:15px;}
+  .total b{font-size:22px; color:var(--brand);}
+  .net-pos{color:var(--ok); font-weight:700;}
+  .net-neg{color:#dc2626; font-weight:700;}
+
+  .steps{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:14px;}
+  .step{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.25); border-radius:12px; padding:12px 14px; color:#fff;}
+  .step b{display:block; margin-bottom:4px;}
+  .step span{font-size:13px; opacity:.9;}
+
+  .notice{margin-top:10px; font-size:13px; color:var(--muted);}
+  .toolbar{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;}
+  code.join{background:#111827; color:#a5f3fc; padding:2px 10px; border-radius:8px; letter-spacing:2px;}
+  footer{text-align:center; color:var(--muted); font-size:13px; padding:24px 0; border-top:1px solid var(--line);}
+  .hidden{display:none;}
+  table{width:100%; border-collapse:collapse; font-size:14px;}
+  th,td{text-align:left; padding:8px 6px; border-bottom:1px solid var(--line);}
+  th{color:var(--muted); font-weight:600; font-size:13px;}
+  td.num,th.num{text-align:right; font-variant-numeric:tabular-nums;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="hero-badge">🧭 GradTrip · 毕业旅行拼团规划（原型 v0）</span>
+    <h1>毕业旅行，一键拼团</h1>
+    <p>人再多、目的地再散、预算再不同，也能快速组队、统一行程、算清每一笔钱。</p>
+    <div class="steps">
+      <div class="step"><b>1 · 建团拉人</b><span>创建拼团，分享 6 位加入码，同学输入即可入团</span></div>
+      <div class="step"><b>2 · 目的地投票</b><span>候选目的地每人投票，票高者胜，预算一目了然</span></div>
+      <div class="step"><b>3 · 统一行程</b><span>按天编排行程，谁负责哪一段清清楚楚</span></div>
+      <div class="step"><b>4 · 费用分摊</b><span>记录垫付，自动算出「谁转谁多少钱」，最少转账次数</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="team">👥 拼团成员</button>
+    <button class="tab" data-tab="vote">🗳️ 目的地投票</button>
+    <button class="tab" data-tab="plan">🗓️ 行程安排</button>
+    <button class="tab" data-tab="bill">💰 费用分摊</button>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <!-- 成员 -->
+  <section id="team">
+    <div class="card">
+      <div class="toolbar">
+        <h2>👥 拼团成员 <span class="hint" id="tripTitle"></span></h2>
+        <div class="row">
+          <button class="ghost small" onclick="loadDemo()">载入演示数据</button>
+          <button class="danger small" onclick="resetAll()">清空重来</button>
+        </div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <input id="memberName" placeholder="同学昵称" style="flex:1;min-width:140px">
+        <select id="memberBudget">
+          <option value="500">预算 ≤500 元</option>
+          <option value="1000" selected>预算 ≤1000 元</option>
+          <option value="2000">预算 ≤2000 元</option>
+          <option value="99999">预算不限</option>
+        </select>
+        <button onclick="addMember()">＋ 加入拼团</button>
+      </div>
+      <div class="row notice">加入码：<code class="join" id="joinCode">------</code>（原型阶段：同一浏览器内共享数据，正式版将支持跨设备同步）</div>
+      <div class="list" id="memberList"></div>
+    </div>
+  </section>
+
+  <!-- 投票 -->
+  <section id="vote" class="hidden">
+    <div class="card">
+      <h2>🗳️ 目的地投票 <span class="hint">每人一票，票高者胜；对比人均预算判断是否可负担</span></h2>
+      <div class="row">
+        <input id="destName" placeholder="目的地，如：成都" style="flex:1;min-width:140px">
+        <input id="destCost" type="number" min="0" placeholder="预估人均(元)" style="width:140px">
+        <button onclick="addDest()">＋ 添加候选</button>
+      </div>
+      <div class="list" id="destList"></div>
+    </div>
+  </section>
+
+  <!-- 行程 -->
+  <section id="plan" class="hidden">
+    <div class="card">
+      <h2>🗓️ 行程安排 <span class="hint">按天添加行程点，指定负责人</span></h2>
+      <div class="row">
+        <select id="planDay"></select>
+        <input id="planText" placeholder="行程内容，如：宽窄巷子逛吃" style="flex:1;min-width:160px">
+        <select id="planOwner"></select>
+        <button onclick="addPlan()">＋ 添加</button>
+      </div>
+      <div class="row notice">
+        <button class="ghost small" onclick="changeDays(-1)">− 1 天</button>
+        <span id="daysLabel" class="pill">共 3 天</span>
+        <button class="ghost small" onclick="changeDays(1)">＋ 1 天</button>
+      </div>
+      <div class="list" id="planList"></div>
+    </div>
+  </section>
+
+  <!-- 费用 -->
+  <section id="bill" class="hidden">
+    <div class="grid">
+      <div class="card">
+        <h2>💰 垫付记录 <span class="hint">谁垫的钱、算给谁</span></h2>
+        <div class="row">
+          <select id="payer"></select>
+          <input id="billDesc" placeholder="事项，如：民宿定金" style="flex:1;min-width:120px">
+          <input id="billAmount" type="number" min="0" placeholder="金额" style="width:100px">
+          <button onclick="addBill()">＋ 记一笔</button>
+        </div>
+        <div class="row notice">分摊范围：默认全体成员均摊</div>
+        <div class="list" id="billList"></div>
+        <p class="total" style="margin-top:12px">团费总额：<b id="billTotal">¥0</b> · 人均 <span id="billAvg">¥0</span></p>
+      </div>
+      <div class="card">
+        <h2>🔄 结算方案 <span class="hint">最少转账次数，谁转谁多少钱</span></h2>
+        <div class="list" id="settleList"></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>GradTrip · 毕业旅行拼团规划原型 · 数据保存在本地浏览器 · GitHub Pages 部署</footer>
+
+<script>
+const KEY = 'gradtrip_v1';
+let db = load();
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || null; }catch(e){ return null; } }
+function save(){ localStorage.setItem(KEY, JSON.stringify(db)); }
+
+function initDb(){
+  return {
+    joinCode: String(Math.floor(100000 + Math.random()*900000)),
+    members: [],       // {name, budget}
+    dests: [],         // {name, cost, votes:[]}
+    days: 3,
+    plans: [],         // {day, text, owner}
+    bills: []          // {payer, desc, amount}
+  };
+}
+if(!db) db = initDb();
+
+const $ = id => document.getElementById(id);
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.onclick = ()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    ['team','vote','plan','bill'].forEach(t=>$(t).classList.add('hidden'));
+    $(btn.dataset.tab).classList.remove('hidden');
+  };
+});
+
+/* ---------- 成员 ---------- */
+function addMember(){
+  const name = $('memberName').value.trim();
+  if(!name) return alert('先填同学昵称～');
+  if(db.members.some(m=>m.name===name)) return alert('这位同学已经在团里啦');
+  db.members.push({name, budget:+$('memberBudget').value});
+  $('memberName').value=''; save(); render();
+}
+function delMember(i){
+  const name = db.members[i].name;
+  db.members.splice(i,1);
+  db.dests.forEach(d=>d.votes=d.votes.filter(v=>v!==name));
+  db.bills = db.bills.filter(b=>b.payer!==name);
+  save(); render();
+}
+function budgetLabel(b){ return b>=99999 ? '预算不限' : '≤'+b+' 元'; }
+
+/* ---------- 投票 ---------- */
+function addDest(){
+  const name = $('destName').value.trim();
+  if(!name) return alert('填一个目的地吧～');
+  db.dests.push({name, cost:+$('destCost').value||0, votes:[]});
+  $('destName').value=''; $('destCost').value=''; save(); render();
+}
+function toggleVote(dest, name){
+  const d = db.dests.find(x=>x.name===dest);
+  d.votes = d.votes.includes(name) ? d.votes.filter(v=>v!==name) : [...d.votes, name];
+  save(); render();
+}
+function delDest(i){ db.dests.splice(i,1); save(); render(); }
+
+/* ---------- 行程 ---------- */
+function changeDays(d){
+  db.days = Math.max(1, db.days + d);
+  db.plans = db.plans.filter(p=>p.day<=db.days);
+  save(); render();
+}
+function addPlan(){
+  const text = $('planText').value.trim();
+  if(!text) return alert('写点行程内容～');
+  db.plans.push({day:+$('planDay').value, text, owner:$('planOwner').value||'待定'});
+  $('planText').value=''; save(); render();
+}
+function delPlan(i){ db.plans.splice(i,1); save(); render(); }
+
+/* ---------- 费用 ---------- */
+function addBill(){
+  const amount = +$('billAmount').value;
+  if(!amount || amount<=0) return alert('填一下金额～');
+  db.bills.push({payer:$('payer').value, desc:$('billDesc').value.trim()||'团费', amount});
+  $('billDesc').value=''; $('billAmount').value=''; save(); render();
+}
+function delBill(i){ db.bills.splice(i,1); save(); render(); }
+
+/* 最少转账结算：净额排序后双指针抵扣 */
+function settle(){
+  const n = db.members.length;
+  const total = db.bills.reduce((s,b)=>s+b.amount,0);
+  if(n===0 || total===0) return {total, avg:0, transfers:[]};
+  const avg = total/n;
+  const net = db.members.map(m=>{
+    const paid = db.bills.filter(b=>b.payer===m.name).reduce((s,b)=>s+b.amount,0);
+    return {name:m.name, net:paid-avg};
+  }).sort((a,b)=>a.net-b.net);
+  const transfers=[];
+  let i=0, j=net.length-1;
+  while(i<j){
+    const give=Math.min(-net[i].net, net[j].net);
+    if(give>0.005) transfers.push({from:net[i].name, to:net[j].name, amount:give});
+    net[i].net+=give; net[j].net-=give;
+    if(Math.abs(net[i].net)<0.005) i++;
+    if(Math.abs(net[j].net)<0.005) j--;
+  }
+  return {total, avg, transfers};
+}
+
+/* ---------- 渲染 ---------- */
+function render(){
+  $('joinCode').textContent = db.joinCode;
+  $('tripTitle').textContent = db.members.length ? `· 当前 ${db.members.length} 人` : '· 还没有人，先拉人入团';
+
+  $('memberList').innerHTML = db.members.length
+    ? db.members.map((m,i)=>`<div class="item"><div><b>${m.name}</b> <span class="pill">${budgetLabel(m.budget)}</span></div>
+        <button class="danger small" onclick="delMember(${i})">移出</button></div>`).join('')
+    : `<div class="empty">还没有成员，输入昵称「加入拼团」，或点右上角「载入演示数据」看看效果</div>`;
+
+  const maxVotes = Math.max(1, ...db.dests.map(d=>d.votes.length));
+  const avgBudget = db.members.length ? db.members.reduce((s,m)=>s+m.budget,0)/db.members.length : 0;
+  $('destList').innerHTML = db.dests.length
+    ? db.dests.map((d,i)=>{
+        const win = d.votes.length===Math.max(...db.dests.map(x=>x.votes.length)) && d.votes.length>0;
+        const afford = avgBudget>0 && d.cost<=avgBudget;
+        return `<div class="item" style="flex-direction:column;align-items:stretch">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><b>${d.name}</b> ${win?'<span class="pill green">🏆 领先</span>':''}
+              <span class="pill ${afford?'green':'orange'}">人均约 ¥${d.cost} ${afford?'· 预算内':'· 超预算'}</span></div>
+            <div class="row">
+              <button class="ghost small" onclick="toggleVote('${d.name}','${esc(db.members[0]?.name||'')}')" title="用第一个成员快速投票">投票</button>
+              <button class="danger small" onclick="delDest(${i})">删除</button>
+            </div>
+          </div>
+          <div class="bar"><i style="width:${d.votes.length/maxVotes*100}%"></i></div>
+          <div class="meta">${d.votes.length} 票 ${d.votes.length?'· '+d.votes.map(v=>'@'+v).join(' '):''}</div>
+        </div>`;
+      }).join('')
+    : `<div class="empty">添加候选目的地，大家各投一票（原型：点「投票」切换第一位成员的票）</div>`;
+
+  $('daysLabel').textContent = `共 ${db.days} 天`;
+  $('planDay').innerHTML = Array.from({length:db.days},(_,i)=>`<option value="${i+1}">第 ${i+1} 天</option>`).join('');
+  const ownerSel = `<option value="">负责人</option>` + db.members.map(m=>`<option>${m.name}</option>`).join('');
+  $('planOwner').innerHTML = ownerSel;
+  $('payer').innerHTML = db.members.length ? db.members.map(m=>`<option>${m.name}</option>`).join('') : `<option value="">先加成员</option>`;
+  const byDay = {};
+  db.plans.forEach(p=>{ (byDay[p.day]=byDay[p.day]||[]).push(p); });
+  $('planList').innerHTML = db.plans.length
+    ? Array.from({length:db.days},(_,i)=>i+1).filter(d=>byDay[d]).map(d=>`
+        <div class="item" style="flex-direction:column;align-items:stretch">
+          <span class="pill">第 ${d} 天</span>
+          ${byDay[d].map(p=>`<div style="display:flex;justify-content:space-between">
+              <span>📍 ${p.text} <span class="meta">· ${p.owner||'待定'}负责</span></span>
+              <button class="danger small" onclick="delPlan(${db.plans.indexOf(p)})">删</button></div>`).join('')}
+        </div>`).join('')
+    : `<div class="empty">目的地定了之后，按天把行程排起来</div>`;
+
+  const s = settle();
+  $('billTotal').textContent = '¥'+s.total.toFixed(2);
+  $('billAvg').textContent = '¥'+s.avg.toFixed(2);
+  $('billList').innerHTML = db.bills.length
+    ? db.bills.map((b,i)=>`<div class="item"><div><b>${b.payer}</b> 垫付 · ${b.desc}</div>
+        <div class="row"><span class="pill">¥${b.amount}</span>
+        <button class="danger small" onclick="delBill(${i})">删</button></div></div>`).join('')
+    : `<div class="empty">旅行中谁垫了钱就记一笔，结束后一键结算</div>`;
+  $('settleList').innerHTML = s.transfers.length
+    ? s.transfers.map(t=>`<div class="item"><span><b>${t.from}</b> → <b>${t.to}</b></span>
+        <span class="net-neg">转 ¥${t.amount.toFixed(2)}</span></div>`).join('')
+      + `<div class="notice">共需 ${s.transfers.length} 次转账，即可两清 ✅</div>`
+    : `<div class="empty">${db.members.length? '暂无垫付，大家两清 ✅' : '加成员、记垫付后，这里会给出转账方案'}</div>`;
+}
+function esc(s){ return (s||'').replace(/'/g,"\\'"); }
+
+/* ---------- 演示数据 ---------- */
+function loadDemo(){
+  if(db.members.length && !confirm('载入演示数据会覆盖当前内容，继续？')) return;
+  db = {
+    joinCode: db.joinCode,
+    members:[
+      {name:'阿柚', budget:1000},{name:'大白', budget:2000},
+      {name:'小满', budget:1000},{name:'老K', budget:99999}
+    ],
+    dests:[
+      {name:'成都', cost:900, votes:['阿柚','小满','老K']},
+      {name:'青岛', cost:1200, votes:['大白']},
+      {name:'长沙', cost:700, votes:[]}
+    ],
+    days:3,
+    plans:[
+      {day:1, text:'集合 · 宽窄巷子逛吃', owner:'阿柚'},
+      {day:2, text:'大熊猫基地 → 九眼桥夜景', owner:'大白'},
+      {day:3, text:'人民公园喝茶 → 返程', owner:'小满'}
+    ],
+    bills:[
+      {payer:'大白', desc:'民宿定金', amount:1200},
+      {payer:'阿柚', desc:'包车两天', amount:800},
+      {payer:'老K', desc:'团餐+门票', amount:600}
+    ]
+  };
+  save(); render();
+}
+function resetAll(){
+  if(!confirm('确定清空所有数据？')) return;
+  db = initDb(); save(); render();
+}
+
+render();
+</script>
+</body>
+</html>
